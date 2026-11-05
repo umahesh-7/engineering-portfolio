@@ -1,0 +1,41 @@
+# dependencies
+node_modules/
+.pnpm-store/
+
+# next.js
+.next/
+out/
+build/
+next-env.d.ts
+*.tsbuildinfo
+
+# environment and secrets
+.env
+.env.*
+!.env.example
+
+# content that must never be committed (see content/README.md)
+*.pdf
+uploads/
+private/
+*.private.*
+
+# tests and reports
+coverage/
+playwright-report/
+test-results/
+blob-report/
+.lighthouseci/
+
+# tooling
+.vercel/
+.turbo/
+.cache/
+*.log
+npm-debug.log*
+pnpm-debug.log*
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json
