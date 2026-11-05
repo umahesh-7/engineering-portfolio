@@ -1,0 +1,67 @@
+---
+title: "A publication allowlist and a build-time leak check for a public API"
+summary: "How this site makes sure its JSON API can only expose an explicit set of fields, and how a leak check in CI catches contact details and working notes before they ship."
+publishedAt: "2026-11-05"
+tags: ["security", "api", "testing"]
+---
+
+The case studies on this site are written from working notes that include things a public page must never show: a phone number copied from a résumé, confidentiality assessments, and open questions about what an employer has approved. The site also has a public JSON API over the same content. The risk is obvious: a working field gets added to the content model and, a build later, it is in the API response for anyone to index.
+
+## Publish from an allowlist, not from the source
+
+The fix is to generate the API from an explicit published shape rather than from the raw content object. The published shape is a Zod schema with only the fields the API may expose, and the serializer builds each item field by field and then validates the result against that schema:
+
+```ts title="src/lib/api.ts"
+export function toPublicProject(project: Project): PublicProject {
+  return publicProjectSchema.parse({
+    slug: project.slug,
+    title: project.title,
+    summary: project.summary,
+    employer: project.employer,
+    period: project.period,
+    primaryPillar: project.primaryPillar,
+    pillars: project.pillars,
+    stack: project.stack,
+    tags: project.tags,
+    outcomes: project.outcomes.map((metric) => ({
+      value: metric.value,
+      label: metric.label,
+      hedge: metric.hedge,
+      basis: basisText(metric.basis),
+    })),
+    url: `${env.NEXT_PUBLIC_SITE_URL}/projects/${project.slug}`,
+    publishedAt: project.publishedAt,
+    updatedAt: project.updatedAt,
+  });
+}
+```
+
+Spreading the source object would be shorter, and it is exactly what the design forbids. A new field in the content model is invisible to the API until someone adds it to the published schema on purpose.
+
+The same schema produces the OpenAPI document, so the documentation cannot drift from what the endpoint returns.
+
+## Check the output, not just the code
+
+A schema guards one path. The leak check guards the result. After every production build, a script starts the server, fetches the API and the key pages, and fails the pipeline if any response contains:
+
+- a key outside the allowlist, or any key from a list of known working-note fields;
+- a phone number pattern or an email address;
+- a GPA;
+- the vulnerability classes from a security audit I am not publishing;
+- anything that reads like a work-authorization statement.
+
+The unit tests pin the two halves together: one test asserts that the allowlist in the script equals the keys of the published schema, so neither can change without the other.
+
+```ts title="tests/unit/public-schema.test.ts"
+it("keeps the leak-check allowlist in sync with the published schema", () => {
+  expect([...PUBLIC_KEYS].sort()).toEqual([...PUBLIC_PROJECT_KEYS].sort());
+});
+```
+
+## Why both
+
+The schema prevents the common mistake, which is adding a field. The output check catches the uncommon one, which is content: a phone number pasted into a case study body, an email in a frontmatter summary, a reviewer's note left in a paragraph. Neither check knows about the other, and that independence is the point.
+
+## Trade-offs
+
+The output check needs a running server, so it adds about a minute to CI. The allowlist means every new public field is a deliberate two-line change in the schema and the serializer. Both costs are small next to the alternative, which is finding out from a search result that a working note went public.

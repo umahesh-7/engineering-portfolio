@@ -1,0 +1,61 @@
+---
+title: "Building this portfolio as a small production system"
+summary: "Why a personal site got a typed content pipeline, a documented API, content gates and performance budgets in CI, and what each decision cost."
+publishedAt: "2026-11-05"
+tags: ["nextjs", "architecture", "delivery"]
+---
+
+A portfolio is the one project a reader can audit end to end. That makes it a poor place for a brochure and a good place for a small production system: the same repository can show front-end craft, a documented backend and the delivery habits around both. This post is the build log for the site you are reading.
+
+## The rendering model
+
+The site runs on Next.js 16 with Cache Components. Pages are prerendered into a static shell at build time, and anything that needs the request streams behind a `<Suspense>` boundary or runs on the client. In practice that means:
+
+- Case-study and writing pages declare `ensureStatic = "navigation"`, so the build fails if any of them accidentally reads request data.
+- View counts are fetched on the client from a small API route. The page itself never touches Redis, so it stays cacheable at the edge.
+- The GitHub activity feed is a `"use cache"` function with an hourly lifetime, and the route that serves it waits for the request so a failed upstream call never gets baked into the build.
+
+The Content Security Policy is set in `next.config.ts` rather than with nonces. Nonces require every page to render dynamically, which throws away the static shell; a header-based policy keeps the pages static at the cost of allowing inline scripts, which Next.js needs for its hydration payload.
+
+## Content as typed data
+
+Case studies, posts and the experience timeline live in the repository as MDX and TypeScript, validated with Zod when the site builds. Two rules in the schema carry most of the weight.
+
+The first is that a figure cannot exist without a basis:
+
+```ts title="src/lib/schemas.ts"
+export const metricSchema = z.object({
+  value: z.string().min(1),
+  label: z.string().min(1),
+  hedge: z.string().optional(),
+  basis: metricBasisSchema, // "measured" with what and how, or "stated" with its source
+});
+```
+
+Every percentage on this site renders next to a line saying where it comes from. Most of them are currently "as stated on the résumé and LinkedIn", which is an honest description of a figure that has not yet been written up with its measurement.
+
+The second rule is the content gate. Some sentences about my current employer wait for approval before they are published. Rather than keep two copies of the site, those sentences carry a `gate` field and render only when the matching flag in the content file is true. The home page, the about page and the résumé all read the same flags, so flipping one flag publishes the approved wording everywhere at once.
+
+## A backend that is actually used
+
+The projects you see on the case-study pages come from the same data that the public JSON API serves. The API is versioned under `/api/v1`, answers conditional requests with `304 Not Modified`, sets `Cache-Control` for a CDN, and documents itself with an OpenAPI 3.1 file generated from the Zod schemas. The contact form is a server action with validation, a honeypot, a Cloudflare Turnstile check, a rate limit and email delivery through Resend, each of which degrades to a safe default when its configuration is missing.
+
+The [follow-up post](/writing/publication-allowlist-and-leak-check) covers the part of the backend I care most about: making sure the API can only ever publish an explicit allowlist of fields.
+
+## Budgets in continuous integration
+
+Every push runs lint and formatting with Biome, a TypeScript check, unit tests with Vitest, a production build, the leak check, Playwright end-to-end tests with axe accessibility checks on every route, and Lighthouse CI with these budgets on the mobile preset:
+
+| Metric | Budget |
+| --- | --- |
+| Performance, accessibility, best practices, SEO | 95 or better |
+| Largest Contentful Paint | under 2.0 s |
+| Cumulative Layout Shift | under 0.05 |
+| Total Blocking Time | under 200 ms |
+| JavaScript transferred on a page, including the framework runtime and route prefetches | 270 kB or less |
+
+A budget that is not enforced is a wish. Keeping them in CI means a dependency bump that doubles the bundle fails the pull request instead of shipping. The script figure deserves a footnote: the Next.js and React runtime alone transfers about 145 kB, and Lighthouse counts the chunks Next prefetches for links on the page, so the budget is set from a measurement of the heaviest page with headroom rather than from a wish. The command palette and the toast library load only when first used to keep every page under it.
+
+## What is deliberately missing
+
+No newsletter, no comments, no relational database and no authentication. Each would add an operational surface without a use case behind it, and showing restraint is part of the engineering I want this site to demonstrate. The one database here is a Redis counter for views, which doubles as the store for rate limiting.

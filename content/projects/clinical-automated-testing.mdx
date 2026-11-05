@@ -1,0 +1,50 @@
+---
+title: "Unit and integration testing for clinical applications, past 90% coverage"
+summary: "Built unit and integration tests with Jest, Selenium and Karma for healthcare applications, reaching 90%+ coverage and reducing production bugs by 40%."
+employer: "Cloud Data Systems, Raynham, MA"
+period: { start: "2024-07", end: "2025-08" }
+primaryPillar: "fullstack"
+pillars: ["fullstack", "ui"]
+stack: ["Jest", "Selenium", "Karma"]
+tags: ["testing", "manual-to-automated", "healthcare"]
+outcomes:
+  - value: "90%+"
+    label: "Unit and integration coverage"
+    basis: { kind: "stated", source: "both" }
+  - value: "40%"
+    label: "Production bugs reduced"
+    basis: { kind: "stated", source: "both" }
+featured: true
+featuredRank: 3
+order: 30
+publishedAt: "2026-11-05"
+---
+
+## Context
+
+Healthcare applications in daily clinical use at Cloud Data Systems, between July 2024 and August 2025. <Inferred>Production bugs were reaching clinicians, and the applications lacked the test coverage needed to catch them earlier.</Inferred> The documents record the result, not the baseline, so that is inferred from the outcome.
+
+## Constraints
+
+- Tests had to cover both layers of a React Native and Next.js front end paired with Node.js and Spring Boot services.
+- The applications were already live: the suite had to be introduced around running software, not before it shipped.
+
+## What I built
+
+Unit and integration tests with Jest, Selenium and Karma, pushing coverage past 90%. Jest covered unit-level behaviour, Selenium drove browser-level integration flows, and Karma ran browser test suites.
+
+<Callout type="note" title="What this page does not claim">
+  The published record does not state the baseline coverage, how the 40% reduction in production bugs was counted, or which continuous-integration system ran the suite, so this page does not state them either. No coverage reports or test output appear here because they would reveal client code.
+</Callout>
+
+## What changed
+
+- Unit and integration coverage passed 90%.
+- Production bugs fell by 40%.
+- Critical applications stayed stable under real clinical load.
+
+## Stack
+
+Jest, Selenium and Karma over a React Native, Next.js, Node.js and Spring Boot stack. The deployment side of the same period is covered in the [cloud-native migration](/projects/cloud-native-migration-docker-kubernetes).
+
+The code is proprietary to the employer and its client.

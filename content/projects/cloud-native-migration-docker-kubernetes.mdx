@@ -1,0 +1,49 @@
+---
+title: "Cloud-native migration of clinical applications to Docker and Kubernetes across AWS and Azure"
+summary: "Containerized clinical applications with Docker and orchestrated them with Kubernetes across AWS and Azure, improving deployment speed by 35% and maintaining 99% service uptime."
+employer: "Cloud Data Systems, Raynham, MA"
+period: { start: "2024-07", end: "2025-08" }
+primaryPillar: "platform"
+pillars: ["platform", "fullstack"]
+stack: ["Docker", "Kubernetes", "AWS", "Azure"]
+tags: ["platform", "manual-to-automated", "healthcare"]
+outcomes:
+  - value: "35%"
+    label: "Deployment speed improved"
+    basis: { kind: "stated", source: "both" }
+  - value: "99%"
+    label: "Service uptime maintained"
+    basis: { kind: "stated", source: "both" }
+featured: true
+featuredRank: 2
+order: 20
+publishedAt: "2026-11-05"
+---
+
+## Context
+
+The same clinical applications described in the [performance case study](/projects/clinical-performance-optimization) needed a deployment model that could keep up with daily clinical use. <Inferred>Deployments were slower and less reliable than they needed to be.</Inferred> The source documents describe the destination, not the starting point, so that is an inference from the outcome.
+
+## Constraints
+
+- Applications in daily clinical use: downtime is visible to people doing clinical work, so uptime was a hard requirement rather than a nice-to-have.
+- Two clouds: the applications ran across AWS and Azure, so the deployment model had to work the same way on both.
+
+## What I built
+
+I deployed Dockerized applications across Azure and AWS via Kubernetes: the applications were containerized with Docker and orchestrated with Kubernetes on both clouds, replacing the previous deployment path with a repeatable one.
+
+<Callout type="note" title="What this page does not claim">
+  The published record does not name the managed Kubernetes services involved, the reason two clouds were used, or the tooling behind the deployment pipeline, so this page does not either. Cluster names, account details and client identities stay private.
+</Callout>
+
+## What changed
+
+- Deployment speed improved by 35%.
+- Service uptime held at 99% for applications in daily clinical use.
+
+## Stack
+
+Docker, Kubernetes, AWS and Azure. The testing work that ran alongside it is covered in the [automated testing case study](/projects/clinical-automated-testing).
+
+The code and infrastructure are proprietary to the employer and its client.
