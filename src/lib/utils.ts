@@ -65,3 +65,12 @@ export function slugify(input: string): string {
 export function absoluteUrl(path: string, base: string): string {
   return new URL(path, base).toString();
 }
+
+/** "Jul 2024 – Present", with an optional display override for the start (used when sources disagree on the month). */
+export function formatPeriod(
+  period: { start: string; end: string },
+  displayStart?: string,
+): string {
+  const start = displayStart ?? formatMonth(period.start);
+  return `${start} – ${formatMonth(period.end)}`;
+}

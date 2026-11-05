@@ -4,40 +4,48 @@ import { useEffect, useState } from "react";
 
 type State = { status: "loading" } | { status: "ready"; views: number } | { status: "disabled" };
 
+const DISABLED_KEY = "views:disabled";
+
 /**
  * Reads and increments the view count through the public API so the page itself stays fully static.
- * Shows a neutral dash when counting is disabled (no Redis configured) or unavailable.
+ * Counts once per session per page, remembers when counting is disabled (no Redis configured) so it
+ * stops sending increments, and shows a neutral dash when unavailable.
  */
 export function ViewCounter({ slug }: { slug: string }) {
   const [state, setState] = useState<State>({ status: "loading" });
 
   useEffect(() => {
     const controller = new AbortController();
-    const key = `viewed:${slug}`;
-    const alreadyCounted = (() => {
+    const seenKey = `viewed:${slug}`;
+    const read = (key: string) => {
       try {
         return sessionStorage.getItem(key) === "1";
       } catch {
         return false;
       }
-    })();
+    };
+    const write = (key: string) => {
+      try {
+        sessionStorage.setItem(key, "1");
+      } catch {
+        /* storage unavailable */
+      }
+    };
+    const increment = !read(seenKey) && !read(DISABLED_KEY);
 
-    fetch(`/api/v1/views/${encodeURIComponent(slug)}`, {
-      method: alreadyCounted ? "GET" : "POST",
+    fetch(`/api/v1/views/${slug}`, {
+      method: increment ? "POST" : "GET",
       signal: controller.signal,
     })
       .then(async (response) => {
         if (!response.ok) throw new Error(String(response.status));
         const data = (await response.json()) as { views: number | null };
         if (data.views === null) {
+          write(DISABLED_KEY);
           setState({ status: "disabled" });
           return;
         }
-        try {
-          sessionStorage.setItem(key, "1");
-        } catch {
-          /* storage unavailable */
-        }
+        write(seenKey);
         setState({ status: "ready", views: data.views });
       })
       .catch(() => setState({ status: "disabled" }));

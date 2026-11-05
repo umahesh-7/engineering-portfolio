@@ -9,14 +9,15 @@ import { Button } from "@/components/ui/button";
 import { getEducation, getExperience, getSkillGroups, isGateOpen, site } from "@/lib/content";
 import { yearsOfExperience } from "@/lib/dates";
 import { env } from "@/lib/env";
+import { pageMetadata } from "@/lib/seo";
 import { formatDate } from "@/lib/utils";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: "About",
   description:
     "Senior full-stack software engineer: experience timeline across government, healthcare and public-sector permitting, a tiered skills matrix, education and certifications.",
-  alternates: { canonical: "/about" },
-};
+  path: "/about",
+});
 
 export default function AboutPage() {
   const experience = getExperience();

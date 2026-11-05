@@ -1,13 +1,8 @@
 import type { Period } from "@/lib/schemas";
-import { formatMonth, monthsBetween } from "@/lib/utils";
+import { monthsBetween } from "@/lib/utils";
 
 /** The date used for "present" durations and the years-of-experience figure. Fixed per build for reproducible output. */
 export const BUILD_DATE = new Date(process.env.BUILD_DATE ?? new Date().toISOString().slice(0, 10));
-
-export function formatPeriod(period: Period, displayStart?: string): string {
-  const start = displayStart ?? formatMonth(period.start);
-  return `${start} – ${formatMonth(period.end)}`;
-}
 
 export function periodMonths(period: Period): number {
   return monthsBetween(period.start, period.end, BUILD_DATE);

@@ -71,9 +71,18 @@ export function createRateLimiter(redis: Redis | null, options: RateLimitOptions
   return redis ? createRedisRateLimiter(redis, options) : createMemoryRateLimiter(options);
 }
 
-/** First hop of X-Forwarded-For, or a stable placeholder so limits still apply locally. */
+/**
+ * Client key for rate limiting. Prefers X-Real-IP, which Vercel (and a correctly configured reverse proxy)
+ * sets from the connection rather than from the request, then the hop appended by the nearest proxy,
+ * which is the rightmost X-Forwarded-For entry; the leftmost hop is attacker-controlled. Falls back to a
+ * single bucket so limits still apply in local development.
+ */
 export function clientKey(headers: Headers): string {
-  const forwarded = headers.get("x-forwarded-for");
-  const first = forwarded?.split(",")[0]?.trim();
-  return first || headers.get("x-real-ip") || "local";
+  const real = headers.get("x-real-ip")?.trim();
+  if (real) return real;
+  const hops = (headers.get("x-forwarded-for") ?? "")
+    .split(",")
+    .map((hop) => hop.trim())
+    .filter(Boolean);
+  return hops[hops.length - 1] ?? "local";
 }

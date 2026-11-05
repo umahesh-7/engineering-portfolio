@@ -21,8 +21,8 @@ A portfolio site is the one piece of UI engineering a reader can verify first-ha
 ## Constraints
 
 - Every factual claim about my work has to trace to a source document, and some current-employer detail is held behind content gates until approval is confirmed. The content model enforces that rather than relying on memory.
-- A hard performance budget: Lighthouse scores of 95 or better on the mobile preset across every page, with Core Web Vitals thresholds enforced in continuous integration.
-- Accessibility to WCAG 2.2 AA, checked automatically with axe on every route and manually with a keyboard.
+- A hard performance budget: Lighthouse scores of 95 or better on the mobile preset across the main routes, with Core Web Vitals thresholds enforced in continuous integration.
+- Accessibility to WCAG 2.2 AA, checked automatically with axe on every page type and manually with a keyboard.
 
 ## What I built
 
@@ -30,14 +30,14 @@ A portfolio site is the one piece of UI engineering a reader can verify first-ha
 - **Content pipeline.** Case studies, writing and the experience timeline live in the repository as MDX and typed data, validated by Zod schemas at build time. A figure cannot be published without a `basis` saying where it comes from; invalid frontmatter fails the build.
 - **Published-schema allowlist.** The public JSON API and the pages are generated from an explicit allowlist of fields. A build-time leak check fails the pipeline if the output contains any other key, a phone or email pattern, or details that are not meant to be public.
 - **Backend.** A versioned, documented projects API with ETag and conditional requests, CORS for reads and an OpenAPI 3.1 document generated from the same Zod schemas; a contact form backed by a server action with validation, a honeypot, bot verification, rate limiting and email delivery; Redis-backed view counts; a health endpoint for uptime monitoring.
-- **Delivery.** Biome for lint and format, Vitest for unit tests, Playwright with axe for end-to-end and accessibility tests, Lighthouse CI for budgets, CodeQL and Dependabot for security hygiene, all on GitHub Actions and deployed on Vercel with a preview per pull request.
+- **Delivery.** Biome for lint and format, Vitest for unit tests, Playwright with axe for end-to-end and accessibility tests, Lighthouse CI for budgets, CodeQL and Dependabot for security hygiene, all on GitHub Actions and built for Vercel with a preview per pull request.
 
 ## What changed
 
-This is the one case study where the measurement is public: the CI run on every push publishes the Lighthouse results, and the axe checks run against every route. The budgets are listed in the repository's Lighthouse configuration.
+This is the one case study where the measurement is public: the CI run on every push enforces the Lighthouse budgets on the main routes and keeps the reports as a build artifact, and the axe checks run against every page type. The budgets are listed in the repository's Lighthouse configuration.
 
 ## Stack
 
-Next.js 16, React 19, TypeScript, Tailwind CSS 4, Zod, Radix primitives, Motion, next-mdx-remote with Shiki, Resend, Upstash Redis, Vitest, Playwright, Lighthouse CI, Biome, GitHub Actions, Vercel.
+Next.js 16, React 19, TypeScript, Tailwind CSS 4, Zod, Radix primitives, next-mdx-remote with Shiki, Resend, Upstash Redis, Vitest, Playwright, Lighthouse CI, Biome, GitHub Actions, Vercel.
 
 The source is public under the MIT licence for the code; the content is all rights reserved.

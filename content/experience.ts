@@ -113,7 +113,6 @@ export const experience: Experience[] = z.array(experienceSchema).parse([
       },
     ],
     stack: ["C#", ".NET", "JavaScript", "DB2", "COBOL (legacy)"],
-    note: "Employer display name pending the owner's confirmation; the résumé lists the role as Office of IT Services, NYS Taxation and Finance.",
   },
   {
     slug: "cloud-data-systems-albany",
@@ -134,8 +133,8 @@ export const experience: Experience[] = z.array(experienceSchema).parse([
         source: "both",
       },
       {
-        text: "Developed interactive UIs using JSP, jQuery, and HTML, increasing user engagement and time-on-task metrics.",
-        source: "resume",
+        text: "Developed interactive UIs using JSP, jQuery, and HTML.",
+        source: "both",
       },
       {
         text: "Applied Factory and Singleton patterns to keep the codebase modular.",
@@ -153,7 +152,6 @@ export const experience: Experience[] = z.array(experienceSchema).parse([
       },
     ],
     stack: ["React Native", "Next.js", "TypeScript", "Spring Boot", "MySQL", "OAuth2"],
-    note: "The start month differs between the résumé (Aug 2022) and LinkedIn (Aug 2023); the year alone is shown until the owner confirms.",
   },
   {
     slug: "maxis-software",

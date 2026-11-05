@@ -16,6 +16,7 @@ export default function WritingPage() {
   return (
     <Section
       id="writing-list"
+      as="h1"
       eyebrow="Writing"
       title="Notes from building things"
       description="Practical write-ups with the measurement attached. New posts appear in the RSS feed."

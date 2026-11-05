@@ -1,7 +1,7 @@
 "use server";
 
 import { headers } from "next/headers";
-import { z } from "zod";
+import * as z from "zod/mini";
 import { type ContactField, type ContactState, contactSchema } from "@/lib/contact-schema";
 import { sendContactEmail } from "@/lib/email";
 import { clientKey, createRateLimiter } from "@/lib/rate-limit";
@@ -13,6 +13,9 @@ const limiter = createRateLimiter(getRedis(), {
   limit: 5,
   windowMs: 10 * 60 * 1000,
 });
+
+/** On the production deployment an unconfigured mailbox is an error; locally and in CI the message is logged instead. */
+const STRICT_DELIVERY = process.env.VERCEL_ENV === "production";
 
 function field(formData: FormData, name: string): string {
   const value = formData.get(name);
@@ -33,11 +36,6 @@ export async function submitContact(
 
   if (!parsed.success) {
     const flat = z.flattenError(parsed.error);
-    const fieldErrors: Partial<Record<ContactField, string>> = {};
-    for (const key of ["name", "email", "message"] as const) {
-      const first = flat.fieldErrors[key]?.[0];
-      if (first) fieldErrors[key] = first;
-    }
     if (flat.fieldErrors.website) {
       // Honeypot filled in: answer as if delivered, without sending anything.
       return {
@@ -45,6 +43,11 @@ export async function submitContact(
         message: "Thanks, your message has been received.",
         delivered: false,
       };
+    }
+    const fieldErrors: Partial<Record<ContactField, string>> = {};
+    for (const key of ["name", "email", "message"] as const) {
+      const first = flat.fieldErrors[key]?.[0];
+      if (first) fieldErrors[key] = first;
     }
     return { status: "error", message: "Please fix the highlighted fields.", fieldErrors };
   }
@@ -75,6 +78,13 @@ export async function submitContact(
       email: parsed.data.email,
       message: parsed.data.message,
     });
+    if (!result.configured && STRICT_DELIVERY) {
+      return {
+        status: "error",
+        message:
+          "Email delivery is not configured on this deployment yet. Please reach me on LinkedIn instead.",
+      };
+    }
     return {
       status: "success",
       message: result.delivered

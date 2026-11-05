@@ -39,6 +39,8 @@ for (const [path, width, scheme] of plan) {
   const context = await browser.newContext({
     viewport: { width, height: 900 },
     colorScheme: scheme,
+    // Reduced motion disables the scroll-driven reveals so a full-page capture shows every section.
+    reducedMotion: "reduce",
     deviceScaleFactor: 1,
   });
   const page = await context.newPage();
@@ -48,8 +50,7 @@ for (const [path, width, scheme] of plan) {
   });
   page.on("pageerror", (error) => problems.push(`${label}: page error: ${error.message}`));
   const response = await page.goto(base + path, { waitUntil: "networkidle" });
-  if (!response || response.status() !== 200)
-    problems.push(`${label}: status ${response?.status()}`);
+  if (response?.status() !== 200) problems.push(`${label}: status ${response?.status()}`);
   await page.waitForTimeout(400);
   const name = `${path.replace(/[/?=&]+/g, "_").replace(/^_|_$/g, "") || "home"}-${width}-${scheme}.png`;
   await page.screenshot({ path: `${out}/${name}`, fullPage: true });

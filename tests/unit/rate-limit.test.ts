@@ -26,14 +26,14 @@ describe("createMemoryRateLimiter", () => {
 });
 
 describe("clientKey", () => {
-  it("uses the first forwarded address", () => {
-    expect(clientKey(new Headers({ "x-forwarded-for": "203.0.113.9, 10.0.0.1" }))).toBe(
-      "203.0.113.9",
-    );
+  it("prefers the platform-set x-real-ip over client-controlled forwarding headers", () => {
+    expect(
+      clientKey(new Headers({ "x-real-ip": "198.51.100.2", "x-forwarded-for": "203.0.113.9" })),
+    ).toBe("198.51.100.2");
   });
 
-  it("falls back to x-real-ip and then a local placeholder", () => {
-    expect(clientKey(new Headers({ "x-real-ip": "198.51.100.2" }))).toBe("198.51.100.2");
+  it("uses the hop appended by the nearest proxy, not a spoofable first hop", () => {
+    expect(clientKey(new Headers({ "x-forwarded-for": "203.0.113.9, 10.0.0.1" }))).toBe("10.0.0.1");
     expect(clientKey(new Headers())).toBe("local");
   });
 });

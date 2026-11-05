@@ -4,21 +4,23 @@ import { ProjectExplorer } from "@/components/site/project-explorer";
 import { Section } from "@/components/site/section";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getProjects, getTechFacets } from "@/lib/content";
-import { toProjectSummary } from "@/lib/tech";
+import { pageMetadata } from "@/lib/seo";
+import { toProjectCard } from "@/lib/tech";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: "Case studies",
   description:
     "Case studies across UI engineering, backend development and full-stack delivery, filterable by pillar, technology and theme.",
-  alternates: { canonical: "/projects" },
-};
+  path: "/projects",
+});
 
 export default function ProjectsPage() {
-  const projects = getProjects().map(toProjectSummary);
+  const projects = getProjects().map(toProjectCard);
   const facets = getTechFacets();
   return (
     <Section
       id="projects"
+      as="h1"
       eyebrow="Case studies"
       title="Work I can stand behind"
       description="Every study follows the same template: context, constraints, what I built, what changed with the basis for each figure, and the stack. Filters are reflected in the URL so a view can be shared."

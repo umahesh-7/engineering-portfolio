@@ -1,16 +1,15 @@
 import { ArrowUpRightIcon } from "lucide-react";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
-import { formatPeriod } from "@/lib/dates";
 import { PILLAR_LABELS } from "@/lib/pillars";
-import type { ProjectSummary } from "@/lib/schemas";
-import { cn } from "@/lib/utils";
+import type { ProjectCardData } from "@/lib/schemas";
+import { cn, formatPeriod } from "@/lib/utils";
 
 export function ProjectCard({
   project,
   className,
 }: {
-  project: ProjectSummary;
+  project: ProjectCardData;
   className?: string;
 }) {
   const outcomes = project.outcomes.slice(0, 2);
@@ -31,7 +30,7 @@ export function ProjectCard({
       <h3 className="mt-4 font-semibold text-title tracking-tight">
         <Link
           href={`/projects/${project.slug}`}
-          className="after:absolute after:inset-0 after:rounded-xl focus-visible:outline-none"
+          className="after:absolute after:inset-0 after:rounded-xl focus-visible:outline-none focus-visible:after:outline-2 focus-visible:after:outline-offset-2 focus-visible:after:outline-ring"
         >
           {project.title}
         </Link>

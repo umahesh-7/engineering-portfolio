@@ -52,7 +52,13 @@ export interface TocEntry {
 export function extractToc(source: string): TocEntry[] {
   const entries: TocEntry[] = [];
   const seen = new Map<string, number>();
+  let inFence = false;
   for (const line of source.split("\n")) {
+    if (/^\s*(```|~~~)/.test(line)) {
+      inFence = !inFence;
+      continue;
+    }
+    if (inFence) continue;
     const match = /^(##|###)\s+(.+?)\s*#*\s*$/.exec(line);
     if (!match) continue;
     const depth = match[1] === "##" ? 2 : 3;

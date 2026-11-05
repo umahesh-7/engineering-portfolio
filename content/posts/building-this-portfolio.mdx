@@ -44,7 +44,7 @@ The [follow-up post](/writing/publication-allowlist-and-leak-check) covers the p
 
 ## Budgets in continuous integration
 
-Every push runs lint and formatting with Biome, a TypeScript check, unit tests with Vitest, a production build, the leak check, Playwright end-to-end tests with axe accessibility checks on every route, and Lighthouse CI with these budgets on the mobile preset:
+Every push runs lint and formatting with Biome, a TypeScript check, unit tests with Vitest, a production build, the leak check, Playwright end-to-end tests with axe accessibility checks on every page type, and Lighthouse CI on the main routes with these budgets on the mobile preset, keeping the reports as a build artifact:
 
 | Metric | Budget |
 | --- | --- |

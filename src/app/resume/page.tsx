@@ -9,9 +9,9 @@ import {
   openBullets,
   site,
 } from "@/lib/content";
-import { BUILD_DATE, formatPeriod, yearsOfExperience } from "@/lib/dates";
+import { BUILD_DATE, yearsOfExperience } from "@/lib/dates";
 import { env } from "@/lib/env";
-import { formatDate } from "@/lib/utils";
+import { formatDate, formatPeriod } from "@/lib/utils";
 
 export const metadata: Metadata = {
   title: "Résumé",
@@ -31,7 +31,7 @@ export default function ResumePage() {
     `Senior full-stack software engineer with over ${years} years of experience building and owning reliable, secure systems for regulated industries, including healthcare and government.`,
     "Works across the full stack, from React, Next.js, and TypeScript front ends to Node.js, Express, and Spring Boot services, with cloud-native deployment on AWS and Azure using Docker and Kubernetes.",
     isGateOpen("omega")
-      ? "Most recently designed and shipped an automated permit pipeline from the ground up, replacing a manual intake process and cutting processing turnaround by around 60%."
+      ? "Most recently designed and shipped an automated permit pipeline from the ground up, replacing a manual intake process and cutting processing turnaround by an estimated 60%."
       : "Currently builds public-sector permitting software at Omega Permits.",
     "Earlier work on healthcare platforms cut backend latency by 30% and pushed test coverage past 90%, keeping critical applications stable under real clinical load.",
   ].join(" ");
@@ -50,7 +50,14 @@ export default function ResumePage() {
         <h1 className="font-semibold text-3xl tracking-tight">{site.name}</h1>
         <p className="mt-1 text-lg">{site.titleLine}</p>
         <p className="mt-2 text-muted-foreground text-sm">
-          {site.location} · {siteHost} · linkedin.com/in/umahesh · github.com/umahesh-7
+          {site.location} · <a href={env.NEXT_PUBLIC_SITE_URL}>{siteHost}</a> ·{" "}
+          <a href={site.links.linkedin} rel="me noopener">
+            linkedin.com/in/umahesh
+          </a>{" "}
+          ·{" "}
+          <a href={site.links.github} rel="me noopener">
+            github.com/umahesh-7
+          </a>
         </p>
       </header>
 

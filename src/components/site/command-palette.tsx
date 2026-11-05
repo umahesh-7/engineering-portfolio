@@ -15,6 +15,11 @@ const CommandPaletteDialog = dynamic(() => import("@/components/site/command-pal
 export function CommandPalette({ items }: { items: SearchItem[] }) {
   const [open, setOpen] = useState(false);
   const [loaded, setLoaded] = useState(false);
+  const [isMac, setIsMac] = useState(true);
+
+  useEffect(() => {
+    setIsMac(/mac|iphone|ipad/i.test(navigator.platform || navigator.userAgent));
+  }, []);
 
   const show = () => {
     setLoaded(true);
@@ -45,9 +50,9 @@ export function CommandPalette({ items }: { items: SearchItem[] }) {
         <SearchIcon className="size-4" aria-hidden="true" />
         <span className="text-xs">Search</span>
         <span className="sr-only">, open the command palette</span>
-        <Kbd aria-hidden="true">⌘K</Kbd>
+        <Kbd aria-hidden="true">{isMac ? "⌘K" : "Ctrl K"}</Kbd>
       </Button>
-      <Button variant="ghost" size="icon" className="md:hidden" onClick={show}>
+      <Button variant="ghost" size="icon" className="size-11 md:hidden" onClick={show}>
         <SearchIcon className="size-5" aria-hidden="true" />
         <span className="sr-only">Search, open the command palette</span>
       </Button>

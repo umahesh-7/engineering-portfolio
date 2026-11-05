@@ -6,7 +6,7 @@ import { ProjectCard } from "@/components/site/project-card";
 import { Section } from "@/components/site/section";
 import { Button } from "@/components/ui/button";
 import { getFeaturedProjects, getPosts, site } from "@/lib/content";
-import { toProjectSummary } from "@/lib/tech";
+import { toProjectCard } from "@/lib/tech";
 import { formatDate } from "@/lib/utils";
 
 export default function HomePage() {
@@ -16,7 +16,7 @@ export default function HomePage() {
   const availability = site.flags.explicitAvailability
     ? site.availability.explicit
     : site.availability.neutral;
-  const featured = getFeaturedProjects(3).map(toProjectSummary);
+  const featured = getFeaturedProjects(3).map(toProjectCard);
   const posts = getPosts().slice(0, 3);
 
   return (
@@ -27,19 +27,17 @@ export default function HomePage() {
           className="-z-10 pointer-events-none absolute inset-0 bg-[radial-gradient(60%_50%_at_70%_0%,var(--accent)_0%,transparent_70%)] opacity-70 dark:opacity-40"
         />
         <Container className="py-20 sm:py-28 lg:py-32">
-          <p className="animate-fade-up font-medium font-mono text-primary text-xs uppercase tracking-[0.2em]">
+          <p className="font-medium font-mono text-primary text-xs uppercase tracking-[0.2em]">
             {site.titleLine}
           </p>
           <h1
             id="hero-heading"
-            className="mt-5 max-w-4xl animate-fade-up text-balance font-semibold text-display tracking-tight [animation-delay:80ms]"
+            className="mt-5 max-w-4xl text-balance font-semibold text-display tracking-tight"
           >
             {headline}
           </h1>
-          <p className="mt-6 max-w-2xl animate-fade-up text-pretty text-lg text-muted-foreground [animation-delay:160ms]">
-            {bio}
-          </p>
-          <div className="mt-8 flex animate-fade-up flex-wrap gap-3 [animation-delay:240ms]">
+          <p className="mt-6 max-w-2xl text-pretty text-lg text-muted-foreground">{bio}</p>
+          <div className="mt-8 flex animate-fade-up flex-wrap gap-3 ">
             <Button asChild size="lg">
               <Link href={site.heroCta.primary.href}>
                 {site.heroCta.primary.label}
@@ -50,12 +48,12 @@ export default function HomePage() {
               <Link href={site.heroCta.secondary.href}>{site.heroCta.secondary.label}</Link>
             </Button>
           </div>
-          <p className="mt-8 inline-flex animate-fade-up items-center gap-2 text-muted-foreground text-sm [animation-delay:320ms]">
+          <p className="mt-8 inline-flex animate-fade-up items-center gap-2 text-muted-foreground text-sm [animation-delay:80ms]">
             <span className="size-2 rounded-full bg-success" aria-hidden="true" />
             {availability}
           </p>
           <ul
-            className="mt-6 flex animate-fade-up flex-wrap gap-2 [animation-delay:400ms]"
+            className="mt-6 flex animate-fade-up flex-wrap gap-2 [animation-delay:160ms]"
             aria-label="Industries"
           >
             {site.industries.map((industry) => (
@@ -74,7 +72,7 @@ export default function HomePage() {
         id="pillars"
         eyebrow="What I do"
         title="Three disciplines, one accountable engineer"
-        description="Each card links to the case study behind the claim. Figures carry the hedge the source documents use, and every case study says what was measured."
+        description="Each card links to the case study behind the claim. Figures carry the hedge the source documents use and are shown with their basis, and each case study states what it does not claim."
         className="border-border border-t bg-muted/30"
       >
         <div className="grid gap-6 lg:grid-cols-3">
@@ -90,7 +88,7 @@ export default function HomePage() {
         id="featured"
         eyebrow="Selected work"
         title="Case studies"
-        description="Former-employer work with measurable outcomes, plus this site as a first-hand UI engineering study."
+        description="Former-employer work with measurable outcomes. This site is written up as a case study of its own, linked from the UI engineering card."
         action={
           <Button asChild variant="outline">
             <Link href="/projects">

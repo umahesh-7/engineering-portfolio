@@ -109,15 +109,20 @@ export const skillGroups: SkillGroup[] = z.array(skillGroupSchema).parse([
         roles: ["cloud-data-systems-raynham", "maxis-software"],
         tag: "java",
       },
-      { name: "Scheduled jobs and notification services", tier: "core", roles: ["omega-permits"] },
-      { name: "API security hardening", tier: "core", roles: ["omega-permits"] },
+      {
+        name: "Scheduled jobs and notification services",
+        tier: "core",
+        roles: ["omega-permits"],
+        gate: "omega",
+      },
+      { name: "API security hardening", tier: "core", roles: ["omega-permits"], gate: "security" },
       {
         name: "Backend performance work",
         tier: "core",
         roles: ["cloud-data-systems-raynham"],
         projects: ["clinical-performance-optimization"],
       },
-      { name: "Workflow automation", tier: "core", roles: ["omega-permits"] },
+      { name: "Workflow automation", tier: "core", roles: ["omega-permits"], gate: "omega" },
       {
         name: "Legacy-system integration",
         tier: "core",
@@ -163,7 +168,12 @@ export const skillGroups: SkillGroup[] = z.array(skillGroupSchema).parse([
         projects: ["cloud-native-migration-docker-kubernetes"],
         tag: "aws",
       },
-      { name: "Backup and disaster recovery", tier: "core", roles: ["omega-permits"] },
+      {
+        name: "Backup and disaster recovery",
+        tier: "core",
+        roles: ["omega-permits"],
+        gate: "omega",
+      },
       {
         name: "Azure",
         tier: "core",
@@ -190,8 +200,18 @@ export const skillGroups: SkillGroup[] = z.array(skillGroupSchema).parse([
         tier: "core",
         roles: ["omega-permits", "maxis-software"],
       },
-      { name: "nginx and TLS (Let's Encrypt)", tier: "core", roles: ["omega-permits"] },
-      { name: "Multi-branch staging environments", tier: "core", roles: ["omega-permits"] },
+      {
+        name: "nginx and TLS (Let's Encrypt)",
+        tier: "core",
+        roles: ["omega-permits"],
+        gate: "omega",
+      },
+      {
+        name: "Multi-branch staging environments",
+        tier: "core",
+        roles: ["omega-permits"],
+        gate: "omega",
+      },
       {
         name: "Production operations",
         tier: "core",
@@ -226,7 +246,12 @@ export const skillGroups: SkillGroup[] = z.array(skillGroupSchema).parse([
         projects: ["this-portfolio", "cloud-native-migration-docker-kubernetes"],
         tag: "ci-cd",
       },
-      { name: "Git, including worktrees", tier: "core", roles: ["omega-permits"] },
+      {
+        name: "Git",
+        tier: "core",
+        roles: ["cloud-data-systems-albany", "omega-permits"],
+        tag: "git",
+      },
       {
         name: "Automated testing to 90%+ coverage",
         tier: "core",
@@ -259,17 +284,14 @@ export const skillGroups: SkillGroup[] = z.array(skillGroupSchema).parse([
         name: "Safe production testing and failure alerting",
         tier: "core",
         roles: ["omega-permits"],
+        gate: "omega",
       },
       {
         name: "Compliance-aware engineering",
         tier: "core",
         roles: ["omega-permits", "cloud-data-systems-raynham", "nys-its"],
       },
-      {
-        name: "Architecture ownership and engineering standards",
-        tier: "core",
-        roles: ["omega-permits"],
-      },
+      { name: "Architecture ownership and engineering standards", tier: "core", roles: [] },
       {
         name: "Modular, reusable code architecture",
         tier: "core",

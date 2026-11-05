@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    branches: ["**"]
   pull_request:
   workflow_dispatch:
 
@@ -42,7 +42,7 @@ jobs:
         run: pnpm typecheck
 
       - name: Audit dependencies
-        run: pnpm audit --audit-level=high
+        run: pnpm audit --audit-level=high --prod
 
       - name: Unit tests
         run: pnpm test -- --coverage
@@ -52,6 +52,8 @@ jobs:
 
       - name: Public output leak check
         run: pnpm check:public
+        env:
+          LEAK_CHECK_PRIVATE_PATTERNS: ${{ secrets.LEAK_CHECK_PRIVATE_PATTERNS }}
 
       - name: Install Playwright browser
         run: pnpm exec playwright install --with-deps chromium
@@ -69,3 +71,11 @@ jobs:
 
       - name: Lighthouse CI
         run: pnpm lhci
+
+      - name: Upload Lighthouse reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lighthouse-reports
+          path: .lighthouseci
+          retention-days: 14

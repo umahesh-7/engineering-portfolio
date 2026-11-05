@@ -34,7 +34,8 @@ export const site = siteSchema.parse({
     explicitAvailability: false,
   },
   availability: {
-    neutral: "Senior Software Engineer at Omega Permits · Massachusetts, USA",
+    neutral:
+      "Senior Software Engineer at Omega Permits, open to conversations about reliability-focused roles · Massachusetts, USA",
     explicit:
       "Open to Senior Software Engineer, Full Stack Engineer, Backend Engineer and Platform Engineer roles, especially where reliability, compliance and real impact matter.",
   },
@@ -74,7 +75,7 @@ export const site = siteSchema.parse({
       title: "Front ends for the systems I build",
       blurb: [
         {
-          text: "I build front ends in React Native, Next.js and TypeScript; that has included the React Native and Next.js healthcare applications in daily clinical use. Each result below links to a case study that says what changed and how it was measured.",
+          text: "I build front ends in React Native, Next.js and TypeScript; that has included the React Native and Next.js healthcare applications in daily clinical use. Each result below links to a case study that says what changed and where the figure comes from.",
         },
       ],
       proofPoints: [
@@ -106,6 +107,10 @@ export const site = siteSchema.parse({
         {
           text: "At Omega Permits the backend covers the permit request pipeline and its notification layer: data model, API, scheduled jobs, deduplicated alerting and outbound email. I also run the platform underneath it: TLS certificates, disaster recovery and multi-branch staging.",
           gate: "omega",
+        },
+        {
+          text: "I also hardened every public-facing endpoint.",
+          gate: "security",
         },
       ],
       proofPoints: [

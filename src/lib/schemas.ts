@@ -82,8 +82,18 @@ export interface Project extends ProjectFrontmatter {
   readingMinutes: number;
 }
 
-/** Everything a card or filter needs, without the MDX body. Safe to pass to client components. */
-export interface ProjectSummary extends Omit<Project, "body"> {
+/** Exactly what a card or filter needs. Build-time controls and the body never reach client components. */
+export interface ProjectCardData {
+  slug: string;
+  title: string;
+  summary: string;
+  employer: string;
+  period: Period;
+  primaryPillar: Pillar;
+  pillars: Pillar[];
+  stack: string[];
+  tags: string[];
+  outcomes: { value: string; label: string; hedge?: string }[];
   techTags: string[];
 }
 
@@ -188,6 +198,8 @@ export type SkillTier = z.infer<typeof skillTierSchema>;
 export const skillSchema = z.object({
   name: z.string().min(1),
   tier: skillTierSchema,
+  /** Skills whose name alone reveals gated current-employer work render only when the gate is open. */
+  gate: gateSchema.optional(),
   /** Experience slugs that evidence the skill (core and working tiers). */
   roles: z.array(z.string()).default([]),
   /** Project slugs that evidence the skill. */

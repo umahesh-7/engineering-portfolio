@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { getExperience, getPosts, getProjects, isGateOpen, openBullets, site } from "@/lib/content";
+import { FORBIDDEN_PATTERNS } from "../../scripts/check-public-output.mjs";
 
 describe("content loaders", () => {
   it("loads every case study with valid frontmatter and a basis on every figure", () => {
@@ -40,10 +41,15 @@ describe("content gates", () => {
     expect(resume.length).toBe(about.length + 1);
   });
 
-  it("never carries audit findings in content", () => {
-    const text = JSON.stringify([getExperience(), site, getProjects().map((p) => p.body)]);
-    expect(text).not.toMatch(/open redirect|content-disposition|header injection/i);
-    expect(text).not.toMatch(/\b838\b.*\b9067\b/);
-    expect(text).not.toMatch(/\bGPA\b/);
+  it("never carries contact data, scores or security findings in content", () => {
+    const text = JSON.stringify([
+      getExperience(),
+      site,
+      getProjects().map((p) => p.body),
+      getPosts().map((p) => p.body),
+    ]);
+    for (const { name, regex } of FORBIDDEN_PATTERNS) {
+      expect(regex.test(text), `content matches the ${name} pattern`).toBe(false);
+    }
   });
 });

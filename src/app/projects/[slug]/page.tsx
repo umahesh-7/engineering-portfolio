@@ -10,12 +10,11 @@ import { ViewCounter } from "@/components/site/view-counter";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { getProject, getProjects, getRelatedProjects, site } from "@/lib/content";
-import { formatPeriod } from "@/lib/dates";
 import { env } from "@/lib/env";
 import { extractToc, renderMdx } from "@/lib/mdx";
 import { PILLAR_LABELS } from "@/lib/pillars";
-import { toProjectSummary } from "@/lib/tech";
-import { formatDate } from "@/lib/utils";
+import { toProjectCard } from "@/lib/tech";
+import { formatDate, formatPeriod } from "@/lib/utils";
 
 export const ensureStatic = "navigation";
 
@@ -35,6 +34,8 @@ export async function generateMetadata({
     alternates: { canonical: `/projects/${project.slug}` },
     openGraph: {
       type: "article",
+      siteName: site.name,
+      locale: "en_US",
       title: project.title,
       description: project.summary,
       url: `/projects/${project.slug}`,
@@ -53,7 +54,7 @@ export default async function ProjectPage({ params }: PageProps<"/projects/[slug
 
   const [content, related] = await Promise.all([
     renderMdx(project.body),
-    Promise.resolve(getRelatedProjects(slug, 2).map(toProjectSummary)),
+    Promise.resolve(getRelatedProjects(slug, 2).map(toProjectCard)),
   ]);
   const toc = extractToc(project.body);
 
@@ -138,7 +139,7 @@ export default async function ProjectPage({ params }: PageProps<"/projects/[slug
       </header>
 
       <Container className="grid gap-12 py-12 lg:grid-cols-[1fr_16rem] lg:py-16">
-        <div className="prose">{content}</div>
+        <div className="prose min-w-0">{content}</div>
         <aside className="hidden lg:block">
           <div className="sticky top-24 space-y-8">
             <Toc entries={toc} />

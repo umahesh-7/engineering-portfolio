@@ -1,38 +1,44 @@
 "use client";
 
 import { MenuIcon } from "lucide-react";
-import { useState } from "react";
-import { type NavItem, NavLinks } from "@/components/site/nav-links";
+import dynamic from "next/dynamic";
+import { useRef, useState } from "react";
+import type { NavItem } from "@/components/site/nav-links";
 import { Button } from "@/components/ui/button";
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
+
+/** The sheet (a Radix dialog) loads on first open so desktop visitors never download it. */
+const MobileNavSheet = dynamic(() => import("@/components/site/mobile-nav-sheet"), { ssr: false });
 
 export function MobileNav({ items, name }: { items: NavItem[]; name: string }) {
   const [open, setOpen] = useState(false);
+  const [loaded, setLoaded] = useState(false);
+  const triggerRef = useRef<HTMLButtonElement>(null);
   return (
-    <Sheet open={open} onOpenChange={setOpen}>
-      <SheetTrigger asChild>
-        <Button variant="ghost" size="icon" className="md:hidden" aria-label="Open navigation menu">
-          <MenuIcon className="size-5" />
-        </Button>
-      </SheetTrigger>
-      <SheetContent>
-        <SheetTitle>{name}</SheetTitle>
-        <SheetDescription>Site navigation</SheetDescription>
-        <nav aria-label="Mobile">
-          <NavLinks
-            items={items}
-            className="flex-col items-stretch gap-1"
-            linkClassName="h-11 w-full text-base"
-            onNavigate={() => setOpen(false)}
-          />
-        </nav>
-      </SheetContent>
-    </Sheet>
+    <>
+      <Button
+        ref={triggerRef}
+        variant="ghost"
+        size="icon"
+        className="size-11 md:hidden"
+        aria-label="Open navigation menu"
+        aria-haspopup="dialog"
+        aria-expanded={open}
+        onClick={() => {
+          setLoaded(true);
+          setOpen(true);
+        }}
+      >
+        <MenuIcon className="size-5" />
+      </Button>
+      {loaded ? (
+        <MobileNavSheet
+          items={items}
+          name={name}
+          open={open}
+          onOpenChange={setOpen}
+          triggerRef={triggerRef}
+        />
+      ) : null}
+    </>
   );
 }

@@ -28,6 +28,8 @@ export async function generateMetadata({
     alternates: { canonical: `/writing/${post.slug}` },
     openGraph: {
       type: "article",
+      siteName: site.name,
+      locale: "en_US",
       title: post.title,
       description: post.summary,
       url: `/writing/${post.slug}`,
@@ -86,7 +88,7 @@ export default async function PostPage({ params }: PageProps<"/writing/[slug]">)
         </Container>
       </header>
       <Container className="grid gap-12 py-12 lg:grid-cols-[1fr_16rem] lg:py-16">
-        <div className="prose">{content}</div>
+        <div className="prose min-w-0">{content}</div>
         <aside className="hidden lg:block">
           <div className="sticky top-24">
             <Toc entries={toc} />

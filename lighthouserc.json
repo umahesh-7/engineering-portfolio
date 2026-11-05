@@ -6,8 +6,10 @@
       "url": [
         "http://localhost:3000/",
         "http://localhost:3000/projects",
+        "http://localhost:3000/projects/this-portfolio",
         "http://localhost:3000/about",
         "http://localhost:3000/writing",
+        "http://localhost:3000/writing/building-this-portfolio",
         "http://localhost:3000/contact"
       ],
       "numberOfRuns": 3

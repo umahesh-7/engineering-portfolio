@@ -15,6 +15,9 @@ export default function Image() {
       description={site.seo.description}
       footer={new URL(env.NEXT_PUBLIC_SITE_URL).host}
     />,
-    size,
+    {
+      ...size,
+      headers: { "Cache-Control": "public, max-age=86400, stale-while-revalidate=604800" },
+    },
   );
 }

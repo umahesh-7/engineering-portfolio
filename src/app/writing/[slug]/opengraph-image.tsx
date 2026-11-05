@@ -1,3 +1,4 @@
+import { notFound } from "next/navigation";
 import { ImageResponse } from "next/og";
 import { getPost, getPosts } from "@/lib/content";
 import { env } from "@/lib/env";
@@ -14,11 +15,12 @@ export function generateStaticParams() {
 export default async function Image({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const post = getPost(slug);
+  if (!post) notFound();
   return new ImageResponse(
     <OgCard
       eyebrow="Writing"
-      title={post?.title ?? "Writing"}
-      description={post?.summary}
+      title={post.title}
+      description={post.summary}
       footer={new URL(env.NEXT_PUBLIC_SITE_URL).host}
     />,
     size,

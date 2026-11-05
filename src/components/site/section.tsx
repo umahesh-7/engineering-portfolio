@@ -8,6 +8,8 @@ interface SectionProps extends React.ComponentProps<"section"> {
   title: string;
   description?: string;
   action?: React.ReactNode;
+  /** Heading level: h1 when the section carries the page's main heading. */
+  as?: "h1" | "h2";
 }
 
 export function Section({
@@ -18,9 +20,11 @@ export function Section({
   action,
   className,
   children,
+  as = "h2",
   ...props
 }: SectionProps) {
   const headingId = `${id}-heading`;
+  const Heading = as;
   return (
     <section
       id={id}
@@ -36,9 +40,12 @@ export function Section({
                 {eyebrow}
               </p>
             ) : null}
-            <h2 id={headingId} className="text-balance font-semibold text-headline tracking-tight">
+            <Heading
+              id={headingId}
+              className="text-balance font-semibold text-headline tracking-tight"
+            >
               {title}
-            </h2>
+            </Heading>
             {description ? (
               <p className="mt-3 text-pretty text-muted-foreground">{description}</p>
             ) : null}

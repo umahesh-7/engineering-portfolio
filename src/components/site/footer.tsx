@@ -41,7 +41,7 @@ export function Footer() {
             <a
               href={site.links.linkedin}
               className="inline-flex size-9 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-              aria-label="LinkedIn profile"
+              aria-label="LinkedIn profile (opens in a new tab)"
               rel="me noopener"
               target="_blank"
             >
@@ -50,7 +50,7 @@ export function Footer() {
             <a
               href={site.links.github}
               className="inline-flex size-9 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-              aria-label="GitHub profile"
+              aria-label="GitHub profile (opens in a new tab)"
               rel="me noopener"
               target="_blank"
             >

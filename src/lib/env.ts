@@ -2,8 +2,24 @@ import { createEnv } from "@t3-oss/env-nextjs";
 import { z } from "zod";
 
 /**
+ * Canonical origin. An explicit NEXT_PUBLIC_SITE_URL wins; on Vercel the system variables supply the
+ * production domain or the preview deployment URL; local development and CI fall back to the schema default.
+ */
+function siteUrl(): string | undefined {
+  if (process.env.NEXT_PUBLIC_SITE_URL) return process.env.NEXT_PUBLIC_SITE_URL;
+  const production =
+    process.env.VERCEL_PROJECT_PRODUCTION_URL ??
+    process.env.NEXT_PUBLIC_VERCEL_PROJECT_PRODUCTION_URL;
+  const vercelEnv = process.env.VERCEL_ENV ?? process.env.NEXT_PUBLIC_VERCEL_ENV;
+  if (vercelEnv === "production" && production) return `https://${production}`;
+  const deployment = process.env.VERCEL_URL ?? process.env.NEXT_PUBLIC_VERCEL_URL;
+  if (deployment) return `https://${deployment}`;
+  return undefined;
+}
+
+/**
  * Every variable is optional: a missing value degrades the matching feature gracefully
- * (console email delivery, in-memory rate limiting, disabled view counts, skipped bot check).
+ * (console email delivery in development, in-memory rate limiting, disabled view counts, skipped bot check).
  * Invalid values still fail the build.
  */
 export const env = createEnv({
@@ -32,9 +48,19 @@ export const env = createEnv({
     GITHUB_TOKEN: process.env.GITHUB_TOKEN,
     VERCEL_GIT_COMMIT_SHA: process.env.VERCEL_GIT_COMMIT_SHA,
     NODE_ENV: process.env.NODE_ENV,
-    NEXT_PUBLIC_SITE_URL: process.env.NEXT_PUBLIC_SITE_URL,
+    NEXT_PUBLIC_SITE_URL: siteUrl(),
     NEXT_PUBLIC_TURNSTILE_SITE_KEY: process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY,
   },
   emptyStringAsUndefined: true,
   skipValidation: process.env.SKIP_ENV_VALIDATION === "true",
 });
+
+// Turnstile only works as a pair: a site key without a secret would render a widget nobody verifies,
+// and a secret without a site key would reject every submission for lack of a token.
+if (
+  typeof window === "undefined" &&
+  process.env.SKIP_ENV_VALIDATION !== "true" &&
+  Boolean(env.TURNSTILE_SECRET_KEY) !== Boolean(env.NEXT_PUBLIC_TURNSTILE_SITE_KEY)
+) {
+  throw new Error("Set both NEXT_PUBLIC_TURNSTILE_SITE_KEY and TURNSTILE_SECRET_KEY, or neither.");
+}

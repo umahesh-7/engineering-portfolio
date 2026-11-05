@@ -47,6 +47,14 @@ function schema(input: z.ZodType) {
   return rest;
 }
 
+const kindParameter = {
+  name: "kind",
+  in: "path",
+  required: true,
+  schema: { type: "string", enum: ["projects", "posts"] },
+  description: "Content collection.",
+};
+
 const slugParameter = {
   name: "slug",
   in: "path",
@@ -121,13 +129,14 @@ export function getOpenApiDocument() {
           },
         },
       },
-      "/api/v1/views/{slug}": {
+      "/api/v1/views/{kind}/{slug}": {
         get: {
           tags: ["views"],
           summary: "Read a view count",
           operationId: "getViews",
           parameters: [
-            { ...slugParameter, description: "Content key, for example projects/this-portfolio." },
+            kindParameter,
+            { ...slugParameter, description: "Slug of the case study or post." },
           ],
           responses: {
             "200": {
@@ -144,13 +153,19 @@ export function getOpenApiDocument() {
           tags: ["views"],
           summary: "Increment a view count",
           operationId: "incrementViews",
+          description: "Same-origin only: cross-site requests receive 403.",
           parameters: [
-            { ...slugParameter, description: "Content key, for example projects/this-portfolio." },
+            kindParameter,
+            { ...slugParameter, description: "Slug of the case study or post." },
           ],
           responses: {
             "200": {
               description: "The new count, or null when counting is disabled.",
               content: { "application/json": { schema: schema(viewsSchema) } },
+              "403": {
+                description: "Cross-site request.",
+                content: { "application/json": { schema: schema(errorSchema) } },
+              },
             },
             "404": {
               description: "Unknown content key.",

@@ -2,17 +2,25 @@
 
 import { XIcon } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useCallback, useMemo } from "react";
+import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ProjectCard } from "@/components/site/project-card";
 import { Button } from "@/components/ui/button";
 import { isPillar, PILLAR_LABELS, PILLARS, type Pillar } from "@/lib/pillars";
-import type { ProjectSummary } from "@/lib/schemas";
+import type { ProjectCardData } from "@/lib/schemas";
 import { cn } from "@/lib/utils";
 
 interface Facet {
   tag: string;
   name: string;
 }
+
+interface Filters {
+  pillar: Pillar | null;
+  tech: string[];
+  tag: string | null;
+}
+
+const NO_FILTERS: Filters = { pillar: null, tech: [], tag: null };
 
 const TAG_LABELS: Record<string, string> = {
   "manual-to-automated": "Manual to automated",
@@ -22,40 +30,61 @@ const TAG_LABELS: Record<string, string> = {
   security: "Security",
   platform: "Platform",
   integration: "Integration",
-  backend: "Backend",
   "open-source": "Open source",
   accessibility: "Accessibility",
 };
 
-function parseList(value: string | null): string[] {
-  return value ? value.split(",").filter(Boolean) : [];
+function parseFilters(params: URLSearchParams): Filters {
+  const pillarParam = params.get("pillar");
+  return {
+    pillar: isPillar(pillarParam) ? pillarParam : null,
+    tech: (params.get("tech") ?? "").split(",").filter(Boolean),
+    tag: params.get("tag"),
+  };
+}
+
+function toQuery(filters: Filters): string {
+  const search = new URLSearchParams();
+  if (filters.pillar) search.set("pillar", filters.pillar);
+  if (filters.tech.length) search.set("tech", filters.tech.join(","));
+  if (filters.tag) search.set("tag", filters.tag);
+  return search.toString();
+}
+
+/**
+ * Reads the URL inside its own Suspense boundary so the grid itself is part of the static shell:
+ * the prerendered HTML carries every card, and the URL's filters apply once the page hydrates.
+ */
+function SearchParamsSync({ onChange }: { onChange: (filters: Filters) => void }) {
+  const params = useSearchParams();
+  useEffect(() => {
+    onChange(parseFilters(new URLSearchParams(params.toString())));
+  }, [params, onChange]);
+  return null;
 }
 
 export function ProjectExplorer({
   projects,
   facets,
 }: {
-  projects: ProjectSummary[];
+  projects: ProjectCardData[];
   facets: Facet[];
 }) {
   const router = useRouter();
   const pathname = usePathname();
-  const params = useSearchParams();
-
-  const pillarParam = params.get("pillar");
-  const pillar: Pillar | null = isPillar(pillarParam) ? pillarParam : null;
-  const tech = parseList(params.get("tech"));
-  const tag = params.get("tag");
+  const [filters, setFilters] = useState<Filters>(NO_FILTERS);
+  const statusRef = useRef<HTMLParagraphElement>(null);
+  const { pillar, tech, tag } = filters;
 
   const availableTech = useMemo(() => {
     const used = new Set(projects.flatMap((project) => project.techTags));
     return facets.filter((facet) => used.has(facet.tag));
   }, [projects, facets]);
 
-  const availableTags = useMemo(() => {
-    const used = new Set(projects.flatMap((project) => project.tags));
-    return [...used].sort();
-  }, [projects]);
+  const availableTags = useMemo(
+    () => [...new Set(projects.flatMap((project) => project.tags))].sort(),
+    [projects],
+  );
 
   const filtered = useMemo(
     () =>
@@ -68,33 +97,29 @@ export function ProjectExplorer({
     [projects, pillar, tech, tag],
   );
 
-  const update = useCallback(
-    (next: { pillar?: string | null; tech?: string[]; tag?: string | null }) => {
-      const search = new URLSearchParams(params.toString());
-      const setOrDelete = (key: string, value: string | null | undefined) => {
-        if (value) search.set(key, value);
-        else search.delete(key);
-      };
-      if ("pillar" in next) setOrDelete("pillar", next.pillar ?? null);
-      if ("tech" in next) setOrDelete("tech", next.tech?.length ? next.tech.join(",") : null);
-      if ("tag" in next) setOrDelete("tag", next.tag ?? null);
-      const query = search.toString();
+  const apply = useCallback(
+    (next: Filters) => {
+      setFilters(next);
+      const query = toQuery(next);
       router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false });
     },
-    [params, pathname, router],
+    [pathname, router],
   );
 
   const hasFilters = Boolean(pillar || tech.length || tag);
 
   return (
     <div className="grid gap-8 lg:grid-cols-[16rem_1fr]">
+      <Suspense fallback={null}>
+        <SearchParamsSync onChange={setFilters} />
+      </Suspense>
       <aside aria-label="Filters" className="space-y-6 lg:sticky lg:top-24 lg:self-start">
         <FilterGroup label="Pillar">
           {PILLARS.map((value) => (
             <Chip
               key={value}
               pressed={pillar === value}
-              onClick={() => update({ pillar: pillar === value ? null : value })}
+              onClick={() => apply({ ...filters, pillar: pillar === value ? null : value })}
             >
               {PILLAR_LABELS[value]}
             </Chip>
@@ -108,7 +133,8 @@ export function ProjectExplorer({
                 key={facet.tag}
                 pressed={pressed}
                 onClick={() =>
-                  update({
+                  apply({
+                    ...filters,
                     tech: pressed ? tech.filter((t) => t !== facet.tag) : [...tech, facet.tag],
                   })
                 }
@@ -123,7 +149,7 @@ export function ProjectExplorer({
             <Chip
               key={value}
               pressed={tag === value}
-              onClick={() => update({ tag: tag === value ? null : value })}
+              onClick={() => apply({ ...filters, tag: tag === value ? null : value })}
             >
               {TAG_LABELS[value] ?? value}
             </Chip>
@@ -133,7 +159,10 @@ export function ProjectExplorer({
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => update({ pillar: null, tech: [], tag: null })}
+            onClick={() => {
+              apply(NO_FILTERS);
+              statusRef.current?.focus();
+            }}
           >
             <XIcon aria-hidden="true" />
             Clear filters
@@ -142,7 +171,13 @@ export function ProjectExplorer({
       </aside>
 
       <div>
-        <p className="mb-4 text-muted-foreground text-sm" role="status" aria-live="polite">
+        <p
+          ref={statusRef}
+          tabIndex={-1}
+          className="mb-4 text-muted-foreground text-sm outline-none"
+          role="status"
+          aria-live="polite"
+        >
           Showing {filtered.length} of {projects.length} case studies
           {hasFilters ? " matching the selected filters" : ""}.
         </p>
@@ -190,7 +225,7 @@ function Chip({
       aria-pressed={pressed}
       onClick={onClick}
       className={cn(
-        "rounded-full border px-3 py-1 text-xs transition-colors focus-visible:ring-2 focus-visible:ring-ring",
+        "inline-flex min-h-11 items-center rounded-full border px-3 py-1 text-xs transition-colors focus-visible:ring-2 focus-visible:ring-ring md:min-h-8",
         pressed
           ? "border-primary bg-primary text-primary-foreground"
           : "border-border bg-background text-muted-foreground hover:border-primary/60 hover:text-foreground",

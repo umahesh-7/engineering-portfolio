@@ -1,7 +1,8 @@
 import { BriefcaseIcon, GraduationCapIcon } from "lucide-react";
 import { openBullets } from "@/lib/content";
-import { formatDuration, formatPeriod } from "@/lib/dates";
+import { formatDuration } from "@/lib/dates";
 import type { Education, Experience } from "@/lib/schemas";
+import { formatMonth } from "@/lib/utils";
 
 type Entry =
   | { kind: "role"; start: string; role: Experience }
@@ -59,8 +60,14 @@ function RoleEntry({ role, view }: { role: Experience; view: "about" | "resume" 
           {role.title} · {role.company}
         </h3>
         <p className="text-muted-foreground text-sm">
-          <time>{formatPeriod(role.period, role.displayStart)}</time> ·{" "}
-          {formatDuration(role.period)}
+          <time dateTime={role.period.start}>
+            {role.displayStart ?? formatMonth(role.period.start)}
+          </time>{" "}
+          –{" "}
+          <time dateTime={role.period.end === "present" ? undefined : role.period.end}>
+            {formatMonth(role.period.end)}
+          </time>{" "}
+          · {formatDuration(role.period)}
         </p>
       </div>
       <p className="text-muted-foreground text-sm">{role.location}</p>
@@ -99,7 +106,7 @@ function EducationEntry({ education }: { education: Education }) {
       <div className="flex flex-col gap-1 sm:flex-row sm:items-baseline sm:justify-between">
         <h3 className="font-semibold text-lg tracking-tight">{education.degree}</h3>
         <p className="text-muted-foreground text-sm">
-          <time>{education.period.end.slice(0, 4)}</time>
+          <time dateTime={education.period.end}>{education.period.end.slice(0, 4)}</time>
         </p>
       </div>
       <p className="text-muted-foreground text-sm">{education.school}</p>

@@ -67,11 +67,21 @@ export async function fetchGithubActivity(): Promise<GithubActivity> {
   };
 }
 
+const RETRY_AFTER_FAILURE_MS = 10 * 60 * 1000;
+let lastFailureAt = 0;
+
+/** Serves cached activity; after an upstream failure, skips GitHub for ten minutes per instance instead of retrying on every request. */
 export async function getGithubActivity(): Promise<GithubActivity> {
+  const unavailable: GithubActivity = { source: "unavailable", user: GITHUB_USER, repos: [] };
+  if (Date.now() - lastFailureAt < RETRY_AFTER_FAILURE_MS) return unavailable;
   try {
     return await fetchGithubActivity();
   } catch (error) {
-    console.warn("[github] activity unavailable:", error instanceof Error ? error.message : error);
-    return { source: "unavailable", user: GITHUB_USER, repos: [] };
+    lastFailureAt = Date.now();
+    const message = error instanceof Error ? `${error.name}: ${error.message}` : String(error);
+    console.warn(
+      `[github] activity unavailable (${message}); retrying in ${RETRY_AFTER_FAILURE_MS / 60000} minutes`,
+    );
+    return unavailable;
   }
 }

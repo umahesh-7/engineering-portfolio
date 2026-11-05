@@ -22,6 +22,7 @@ private/
 
 # tests and reports
 coverage/
+screenshots/
 playwright-report/
 test-results/
 blob-report/

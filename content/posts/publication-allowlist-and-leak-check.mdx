@@ -42,17 +42,17 @@ The same schema produces the OpenAPI document, so the documentation cannot drift
 
 ## Check the output, not just the code
 
-A schema guards one path. The leak check guards the result. After every production build, a script starts the server, fetches the API and the key pages, and fails the pipeline if any response contains:
+A schema guards one path. The leak check guards the result. After every production build, a script starts the server, fetches the API and every page listed in the sitemap, and fails the pipeline if any response contains:
 
 - a key outside the allowlist, or any key from a list of known working-note fields;
-- a phone number pattern or an email address;
-- a GPA;
-- the vulnerability classes from a security audit I am not publishing;
+- a phone number pattern or an email address, plus any extra patterns supplied through a CI secret so owner-specific strings never live in the repository;
+- an academic grade average;
+- the vocabulary of security findings, since the details of an audit I took part in are not mine to publish;
 - anything that reads like a work-authorization statement.
 
 The unit tests pin the two halves together: one test asserts that the allowlist in the script equals the keys of the published schema, so neither can change without the other.
 
-```ts title="tests/unit/public-schema.test.ts"
+```ts title="tests/unit/schemas.test.ts"
 it("keeps the leak-check allowlist in sync with the published schema", () => {
   expect([...PUBLIC_KEYS].sort()).toEqual([...PUBLIC_PROJECT_KEYS].sort());
 });

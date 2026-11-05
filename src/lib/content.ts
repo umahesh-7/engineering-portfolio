@@ -158,7 +158,12 @@ export const hasWriting = cache(
 
 export const getExperience = cache((): Experience[] => experience);
 export const getEducation = cache((): Education[] => education);
-export const getSkillGroups = cache((): SkillGroup[] => skillGroups);
+/** Skill groups with gated entries removed while their flag is off, so names alone never reveal gated work. */
+export const getSkillGroups = cache((): SkillGroup[] =>
+  skillGroups
+    .map((group) => ({ ...group, skills: group.skills.filter((skill) => isGateOpen(skill.gate)) }))
+    .filter((group) => group.skills.length > 0),
+);
 
 export function findExperience(slug: string): Experience | undefined {
   return experience.find((role) => role.slug === slug);
@@ -167,7 +172,7 @@ export function findExperience(slug: string): Experience | undefined {
 /** Technologies that may be used as /projects filter facets: core and working tiers only. */
 export const getTechFacets = cache((): { tag: string; name: string }[] => {
   const seen = new Map<string, string>();
-  for (const group of skillGroups) {
+  for (const group of getSkillGroups()) {
     for (const skill of group.skills) {
       if (skill.tag && skill.tier !== "familiar" && !seen.has(skill.tag))
         seen.set(skill.tag, skill.name);

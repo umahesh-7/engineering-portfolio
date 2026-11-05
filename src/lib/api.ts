@@ -12,6 +12,7 @@ export const CORS_HEADERS = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "GET, HEAD, OPTIONS",
   "Access-Control-Allow-Headers": "Content-Type, If-None-Match",
+  "Access-Control-Expose-Headers": "ETag, Cache-Control, X-Api-Version",
   "Access-Control-Max-Age": "86400",
 } as const;
 
@@ -54,6 +55,8 @@ export interface JsonOptions {
   cache?: string;
   etag?: string;
   headers?: Record<string, string>;
+  /** Send CORS headers (default true). Off for same-origin-only writes. */
+  cors?: boolean;
 }
 
 export function json(body: unknown, options: JsonOptions = {}): Response {
@@ -62,7 +65,7 @@ export function json(body: unknown, options: JsonOptions = {}): Response {
     "Content-Type": "application/json; charset=utf-8",
     "X-Content-Type-Options": "nosniff",
     "X-Api-Version": API_VERSION,
-    ...CORS_HEADERS,
+    ...(options.cors === false ? {} : CORS_HEADERS),
     ...options.headers,
   });
   if (options.cache) headers.set("Cache-Control", options.cache);
@@ -98,6 +101,11 @@ export function apiError(status: number, code: string, message: string): Respons
   return json({ error: { code, message } }, { status, cache: "no-store" });
 }
 
-export function preflight(): Response {
-  return new Response(null, { status: 204, headers: CORS_HEADERS });
+export function preflight(
+  methods: string = CORS_HEADERS["Access-Control-Allow-Methods"],
+): Response {
+  return new Response(null, {
+    status: 204,
+    headers: { ...CORS_HEADERS, "Access-Control-Allow-Methods": methods },
+  });
 }

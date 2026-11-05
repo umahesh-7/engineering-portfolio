@@ -1,4 +1,4 @@
-import type { Project, ProjectSummary } from "@/lib/schemas";
+import type { Project, ProjectCardData } from "@/lib/schemas";
 import { slugify } from "@/lib/utils";
 
 const ALIASES: Record<string, string> = {
@@ -21,7 +21,20 @@ export function projectTechTags(project: Pick<Project, "stack">): string[] {
   return [...new Set(project.stack.map(techTag))];
 }
 
-export function toProjectSummary(project: Project): ProjectSummary {
-  const { body: _body, ...summary } = project;
-  return { ...summary, techTags: projectTechTags(project) };
+export function toProjectCard(project: Project): ProjectCardData {
+  return {
+    slug: project.slug,
+    title: project.title,
+    summary: project.summary,
+    employer: project.employer,
+    period: project.period,
+    primaryPillar: project.primaryPillar,
+    pillars: project.pillars,
+    stack: project.stack,
+    tags: project.tags,
+    outcomes: project.outcomes.map(({ value, label, hedge }) =>
+      hedge ? { value, label, hedge } : { value, label },
+    ),
+    techTags: projectTechTags(project),
+  };
 }

@@ -33,6 +33,9 @@ export function CodeBlock({ className, children, ...props }: ComponentProps<"pre
       >
         {copied ? <CheckIcon className="size-4 text-success" /> : <CopyIcon className="size-4" />}
       </button>
+      <span className="sr-only" aria-live="polite">
+        {copied ? "Code copied to clipboard" : ""}
+      </span>
     </div>
   );
 }

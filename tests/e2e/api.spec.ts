@@ -51,12 +51,26 @@ test.describe("public API", () => {
     expect(response.headers()["cache-control"]).toBe("no-store");
   });
 
-  test("view counts validate the content key", async ({ request }) => {
-    const known = await request.get("/api/v1/views/projects%2Fthis-portfolio");
+  test("view counts validate the content key and refuse cross-site increments", async ({
+    request,
+  }) => {
+    const known = await request.get("/api/v1/views/projects/this-portfolio");
     expect(known.status()).toBe(200);
     expect(await known.json()).toMatchObject({ slug: "projects/this-portfolio" });
-    const unknown = await request.post("/api/v1/views/projects%2Fnope");
-    expect(unknown.status()).toBe(404);
+    expect((await request.post("/api/v1/views/projects/nope")).status()).toBe(404);
+    expect((await request.get("/api/v1/views/abc%25zz")).status()).toBe(404);
+    const crossSite = await request.post("/api/v1/views/projects/this-portfolio", {
+      headers: { Origin: "https://evil.example", "Sec-Fetch-Site": "cross-site" },
+    });
+    expect(crossSite.status()).toBe(403);
+    expect(await known.json()).toMatchObject({ slug: "projects/this-portfolio" });
+  });
+
+  test("CORS exposes the validators a browser needs for conditional requests", async ({
+    request,
+  }) => {
+    const response = await request.get("/api/v1/projects");
+    expect(response.headers()["access-control-expose-headers"]).toContain("ETag");
   });
 
   test("pages carry the security headers", async ({ request }) => {
